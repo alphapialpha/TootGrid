@@ -2,7 +2,7 @@
 
 A lightweight, self-contained Mastodon "toots" viewer. Display public posts from one or more Mastodon instances and/or specific user accounts as a clean, responsive card grid — with dark mode, media carousels, auto-refresh, and local caching.
 
-**No build step. No framework. No server-side language. Just three files.**
+**No build step. No framework. No server-side language. Just three main files + some images.**
 
 ---
 
