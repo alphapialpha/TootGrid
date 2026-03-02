@@ -26,24 +26,29 @@
   },
 
   "instances": {
-    "wisskomm.social": {
+    "hachyderm.io": {
       "enabled": true,
       "local": true,
       "remote": false,
       "only_media": false,
-      "limit": 10
+      "limit": 20
     },
-    "idw-online.social": {
+    "fosstodon.org": {
       "enabled": true,
       "local": true,
       "remote": false,
       "only_media": false,
-      "limit": 10
+      "limit": 20
     }
   },
 
   "accounts": {
     "@SomeUser@mastodon.social": {
+      "enabled": false,
+      "only_media": false,
+      "limit": 5
+    },
+    "@SomeUser@fosstodon.org": {
       "enabled": false,
       "only_media": false,
       "limit": 5

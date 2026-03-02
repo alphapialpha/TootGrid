@@ -162,12 +162,12 @@ Fetch posts from a Mastodon instance's **public timeline**.
 
 ```json
 "instances": {
-  "wisskomm.social": {
+  "hachyderm.io": {
     "enabled": true,
     "local": true,
     "remote": false,
     "only_media": false,
-    "limit": 10
+    "limit": 20
   }
 }
 ```
