@@ -258,7 +258,10 @@ Developed as a weekend project — made with love, Linux, and coffee.
 
 **MIT License** — you are free to use, modify, and distribute this project, including commercially.
 
-**One condition applies beyond standard MIT:**
-> The visible attribution link in the application UI (`© AlphaPiAlpha · GitHub`) must be retained in both unmodified and modified distributions.
+**Two conditions apply beyond standard MIT:**
 
-This means you can change everything else — branding, colors, instances, layout — but the credit link in the topbar stays. See the [LICENSE](LICENSE) file for the full text.
+> **1. Attribution link** — The visible attribution link in the application UI (`© AlphaPiAlpha · GitHub`) must be retained in both unmodified and modified distributions.
+
+> **2. Image assets** — `TootGridLogo.webp` and `TootGridLogoSquare.webp` are © AlphaPiAlpha, All Rights Reserved, and are **not** covered by the MIT license. They may not be reused, altered, or redistributed outside of TootGrid. You are free to replace them with your own images.
+
+See the [LICENSE](LICENSE) file for the full text.
