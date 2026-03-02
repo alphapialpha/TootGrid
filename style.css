@@ -1,0 +1,634 @@
+/* style.css — TootGrid */
+
+/* ─── CSS Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── CSS Variables: Light Theme (default) ─────────────────────── */
+:root {
+  --bg:            #f3f4f6;
+  --bg-alt:        #e5e7eb;
+  --fg:            #111827;
+  --fg-muted:      #6b7280;
+  --accent:        #2563eb;
+  --accent-soft:   rgba(37, 99, 235, 0.12);
+  --card-bg:       #ffffff;
+  --shadow-soft:   0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  --shadow-hover:  0 8px 24px rgba(0, 0, 0, 0.13), 0 0 0 1px rgba(0,0,0,0.08), 0 0 20px 3px var(--accent-soft);
+  --border-subtle: rgba(0, 0, 0, 0.07);
+  --topbar-bg:     rgba(243, 244, 246, 0.82);
+  --chip-bg:       rgba(0, 0, 0, 0.07);
+  --chip-fg:       #374151;
+  --btn-bg:        rgba(0, 0, 0, 0.06);
+  --btn-bg-hover:  rgba(0, 0, 0, 0.12);
+  --tag-bg:        var(--accent-soft);
+  --tag-fg:        var(--accent);
+  --dot-bg:        rgba(0, 0, 0, 0.20);
+  --media-overlay: rgba(0, 0, 0, 0.55);
+}
+
+/* ─── CSS Variables: Dark Theme ────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:            #0f1117;
+  --bg-alt:        #1a1d27;
+  --fg:            #e5e7eb;
+  --fg-muted:      #9ca3af;
+  --accent:        #60a5fa;
+  --accent-soft:   rgba(96, 165, 250, 0.25);
+  --card-bg:       #1e2130;
+  --shadow-soft:   0 2px 8px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255,255,255,0.04);
+  --shadow-hover:  0 8px 28px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255,255,255,0.13), 0 0 18px 2px var(--accent-soft);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --topbar-bg:     rgba(15, 17, 23, 0.85);
+  --chip-bg:       rgba(255, 255, 255, 0.08);
+  --chip-fg:       #d1d5db;
+  --btn-bg:        rgba(255, 255, 255, 0.07);
+  --btn-bg-hover:  rgba(255, 255, 255, 0.13);
+  --tag-bg:        var(--accent-soft);
+  --tag-fg:        var(--accent);
+  --dot-bg:        rgba(255, 255, 255, 0.25);
+  --media-overlay: rgba(0, 0, 0, 0.60);
+}
+
+/* ─── Body & Global ─────────────────────────────────────────────── */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, var(--bg-alt) 0, var(--bg) 50%);
+  background-attachment: fixed;
+  color: var(--fg);
+  min-height: 100vh;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ─── App Shell ─────────────────────────────────────────────────── */
+.app-shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem 4rem;
+}
+
+/* ─── Topbar ────────────────────────────────────────────────────── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--topbar-bg);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.55rem 1rem;
+  margin: 0 -1rem 0;
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+/* Title */
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.title-logo {
+  height: 1.5rem;
+  width: auto;
+  flex-shrink: 0;
+  display: block;
+  object-fit: contain;
+}
+
+#appTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+/* Spacer to push actions right */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+/* Tighten gap between refresh button and countdown chip — they read as a pair */
+#refreshBtn + #refreshCountdown {
+  margin-left: -0.2rem;
+}
+
+/* Fixed-width digits so the chip never wobbles as MM:SS changes */
+#refreshCountdown {
+  font-variant-numeric: tabular-nums;
+  min-width: 3.6rem;
+  justify-content: center;
+}
+
+/* Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 1.75rem;
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--chip-bg);
+  color: var(--chip-fg);
+  white-space: nowrap;
+  transition: background 0.2s, opacity 0.3s;
+}
+
+.chip-live {
+  background: rgba(34, 197, 94, 0.18);
+  color: #16a34a;
+}
+[data-theme="dark"] .chip-live {
+  background: rgba(34, 197, 94, 0.22);
+  color: #4ade80;
+}
+
+.chip-error {
+  background: rgba(239, 68, 68, 0.16);
+  color: #dc2626;
+}
+[data-theme="dark"] .chip-error {
+  background: rgba(239, 68, 68, 0.22);
+  color: #f87171;
+}
+
+.chip-fetching {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.chip-ghost {
+  background: var(--chip-bg);
+  color: var(--fg-muted);
+  font-weight: 500;
+}
+
+.chip-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Topbar Buttons */
+.topbar-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 1.75rem;
+  padding: 0 0.65rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--fg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.topbar-actions button:hover {
+  background: var(--btn-bg-hover);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.topbar-actions button:active {
+  transform: scale(0.97);
+}
+
+.icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Topbar Link */
+.topbar-link {
+  font-size: 0.72rem;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+.topbar-link:hover {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+/* ─── Info Row ──────────────────────────────────────────────────── */
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  min-height: 2.2rem;
+}
+
+.grow {
+  flex: 1;
+}
+
+#postCount {
+  font-weight: 600;
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+/* ─── Feed Grid ─────────────────────────────────────────────────── */
+.feed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.1rem;
+  align-items: start;
+}
+
+/* List layout override */
+body.layout-list .feed-grid {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* ─── Cards ─────────────────────────────────────────────────────── */
+.card {
+  background: var(--card-bg);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: box-shadow 0.22s ease, transform 0.22s ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.card-inner {
+  padding: 1rem 1rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.card-user-block {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.card-avatar {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  border: 2px solid var(--border-subtle);
+  flex-shrink: 0;
+  object-fit: cover;
+  background: var(--bg-alt);
+}
+
+.card-user-text {
+  min-width: 0;
+}
+
+.card-user {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-instance {
+  font-size: 0.72rem;
+  color: var(--fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-meta {
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 0.1rem;
+}
+
+/* Card Content */
+.card-content {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--fg);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.card-content p {
+  margin: 0 0 0.4em;
+}
+.card-content p:last-child {
+  margin-bottom: 0;
+}
+.card-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.card-content a:hover {
+  opacity: 0.8;
+}
+
+/* Hashtag / mention styling from Mastodon HTML */
+.card-content .mention,
+.card-content .hashtag {
+  display: inline-block;
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  border-radius: 4px;
+  padding: 0 3px;
+  font-size: 0.85em;
+  text-decoration: none;
+}
+
+/* ─── Media Carousel ─────────────────────────────────────────────── */
+.card-media {
+  position: relative;
+  border-radius: 0.8rem;
+  overflow: hidden;
+  background: #111;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.card-media-track {
+  display: block;
+  line-height: 0;
+}
+
+.card-media-img {
+  display: none;
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.card-media-img.is-active {
+  display: block;
+}
+
+/* Nav arrows */
+.media-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--media-overlay);
+  color: #fff;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.15s, transform 0.15s;
+  padding: 0;
+}
+.media-nav:hover {
+  background: rgba(0, 0, 0, 0.78);
+  transform: translateY(-50%) scale(1.08);
+}
+.media-nav-prev {
+  left: 0.4rem;
+}
+.media-nav-next {
+  right: 0.4rem;
+}
+
+/* Counter */
+.media-counter {
+  position: absolute;
+  bottom: 1.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--media-overlay);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+/* Dots */
+.media-dots {
+  position: absolute;
+  bottom: 0.45rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.3rem;
+  z-index: 10;
+}
+
+.media-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  border: none;
+  background: var(--dot-bg);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s, transform 0.15s;
+}
+.media-dot.is-active {
+  background: var(--accent);
+  transform: scale(1.25);
+}
+
+/* ─── Card Stats & Footer ────────────────────────────────────────── */
+.card-stats {
+  display: flex;
+  gap: 0.8rem;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.card-footer {
+  font-size: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.55rem;
+  margin-top: 0.1rem;
+}
+
+.card-footer a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+.card-footer a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ─── Empty State ───────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  color: var(--fg-muted);
+  margin-top: 4rem;
+  font-size: 1rem;
+  padding: 2rem;
+  border: 2px dashed var(--border-subtle);
+  border-radius: 1rem;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ─── Skeleton Loader ────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.skeleton {
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: var(--card-bg);
+  padding: 1rem;
+}
+
+.skeleton-line {
+  height: 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(
+    90deg,
+    var(--bg-alt) 25%,
+    var(--bg) 50%,
+    var(--bg-alt) 75%
+  );
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.skeleton-line.short  { width: 40%; }
+.skeleton-line.medium { width: 65%; }
+.skeleton-line.full   { width: 100%; }
+.skeleton-line.tall   { height: 1rem; }
+.skeleton-avatar {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    var(--bg-alt) 25%,
+    var(--bg) 50%,
+    var(--bg-alt) 75%
+  );
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+  flex-shrink: 0;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .topbar-inner {
+    gap: 0.4rem;
+  }
+
+  #appTitle {
+    font-size: 0.9rem;
+  }
+
+  .topbar-actions {
+    gap: 0.35rem;
+  }
+
+  .topbar-actions button span:not(.icon) {
+    display: none;
+  }
+
+  .topbar-link {
+    display: none;
+  }
+
+  .feed-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-media-img {
+    max-height: 180px;
+  }
+
+  .info-row {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .chip-ghost {
+    display: none;
+  }
+}

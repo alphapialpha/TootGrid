@@ -1,0 +1,723 @@
+<!-- index.html — TootGrid -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TootGrid</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" id="faviconLink" href="favicon.ico">
+</head>
+<body class="layout-grid">
+
+  <div class="app-shell">
+
+    <!-- ── Top Bar ─────────────────────────────────────── -->
+    <div class="topbar">
+      <div class="topbar-inner">
+
+        <div class="title">
+          <picture>
+            <source media="(max-width: 900px)" srcset="TootGridLogoSquare.webp">
+            <img class="title-logo" src="TootGridLogo.webp" alt="TootGrid logo">
+          </picture>
+          <span id="appTitle">TootGrid</span>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="chip" id="statusChip">Starting…</div>
+
+          <button id="refreshBtn" type="button" title="Refresh now">
+            <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span>
+          </button>
+          <div class="chip chip-ghost chip-hidden" id="refreshCountdown" title="Next auto-refresh"></div>
+
+          <button id="themeToggle" type="button" title="Toggle theme">
+            <span class="icon" id="themeIcon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.78" y2="4.22"/></svg></span>
+          </button>
+
+          <a href="https://github.com/alphapialpha/"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="topbar-link">
+            © AlphaPiAlpha · GitHub
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Info Row ────────────────────────────────────── -->
+    <div class="info-row">
+      <span class="grow" id="infoText">Loading configuration…</span>
+      <span id="postCount"></span>
+    </div>
+
+    <!-- ── Posts Container ─────────────────────────────── -->
+    <div id="postsContainer" class="feed-grid"></div>
+
+    <!-- ── Empty State ────────────────────────────────── -->
+    <div id="emptyState" class="empty-state" style="display:none;">
+      No posts yet. Check your config or tap "Refresh".
+    </div>
+
+  </div><!-- .app-shell -->
+
+  <!-- ════════════════════════════════════════════════════
+       APPLICATION JAVASCRIPT
+  ═════════════════════════════════════════════════════ -->
+  <script>
+  (function () {
+    'use strict';
+
+    // ── Icon SVGs (monochrome, currentColor) ───────────────────────
+    const SVG_SUN  = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="7.05" y2="7.05"/><line x1="16.95" y1="16.95" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="7.05" y2="16.95"/><line x1="16.95" y1="7.05" x2="19.78" y2="4.22"/></svg>`;
+    const SVG_MOON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+
+    // ── Globals ────────────────────────────────────────────────────
+    let CONFIG          = {};
+    let CACHE_KEY       = 'mastofeed_posts_v1';
+    let THEME_KEY       = 'mastofeed_theme';
+    let autoRefreshIntervalSec = 0;
+    let nextRefreshAt   = 0;
+    let countdownTimer  = null;
+    let isRefreshing    = false;
+
+    // ── DOM Refs ───────────────────────────────────────────────────
+    const $  = id => document.getElementById(id);
+    const el = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
+
+    const statusChip      = $('statusChip');
+    const refreshCountdown = $('refreshCountdown');
+    const infoText        = $('infoText');
+    const postCount       = $('postCount');
+    const postsContainer  = $('postsContainer');
+    const emptyState      = $('emptyState');
+    const themeToggle     = $('themeToggle');
+    const themeIcon       = $('themeIcon');
+    const refreshBtn      = $('refreshBtn');
+    const appTitle        = $('appTitle');
+
+    // ══════════════════════════════════════════════════════════════
+    // 1. CONFIGURATION
+    // ══════════════════════════════════════════════════════════════
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('config.json?_=' + Date.now());
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        CONFIG = await res.json();
+      } catch (e) {
+        CONFIG = {};
+        setStatus('Error', 'error');
+        setInfo('Error loading config.json — ' + e.message);
+        return false;
+      }
+
+      // Cache key
+      CACHE_KEY = CONFIG.cacheKey || 'TootGrid_posts_v1';
+
+      // Title
+      const title = CONFIG.title || 'TootGrid';
+      document.title = title;
+      appTitle.textContent = title;
+
+      // Favicon
+      if (CONFIG.favicon) {
+        $('faviconLink').href = CONFIG.favicon;
+      }
+
+      // Layout
+      const mode = (CONFIG.layout && CONFIG.layout.mode) || 'grid';
+      document.body.className = 'layout-' + (mode === 'list' ? 'list' : 'grid');
+
+      return true;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 2. THEME
+    // ══════════════════════════════════════════════════════════════
+
+    function resolveInitialMode() {
+      const stored = localStorage.getItem(THEME_KEY);
+      if (stored === 'light' || stored === 'dark') return stored;
+
+      const defaultMode = (CONFIG.theme && CONFIG.theme.defaultMode) || 'auto';
+      if (defaultMode === 'light') return 'light';
+      if (defaultMode === 'dark')  return 'dark';
+
+      // auto → OS preference
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function applyTheme(mode) {
+      document.documentElement.setAttribute('data-theme', mode);
+      localStorage.setItem(THEME_KEY, mode);
+
+      // Apply config overrides
+      const overrides = mode === 'dark'
+        ? (CONFIG.theme && CONFIG.theme.darkOverrides)  || {}
+        : (CONFIG.theme && CONFIG.theme.lightOverrides) || {};
+      const root = document.documentElement;
+      for (const [prop, val] of Object.entries(overrides)) {
+        root.style.setProperty(prop, val);
+      }
+
+      // Update toggle button
+      if (mode === 'dark') {
+        themeIcon.innerHTML = SVG_MOON;
+      } else {
+        themeIcon.innerHTML = SVG_SUN;
+      }
+    }
+
+    function initTheme() {
+      const mode = resolveInitialMode();
+      applyTheme(mode);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    // ══════════════════════════════════════════════════════════════
+    // 3. STATUS / INFO HELPERS
+    // ══════════════════════════════════════════════════════════════
+
+    function setStatus(text, variant) {
+      statusChip.textContent = text;
+      statusChip.className   = 'chip';
+      if (variant === 'live')     statusChip.classList.add('chip-live');
+      if (variant === 'error')    statusChip.classList.add('chip-error');
+      if (variant === 'fetching') statusChip.classList.add('chip-fetching');
+    }
+
+    function setInfo(text) {
+      infoText.textContent = text;
+    }
+
+    function setPostCount(n) {
+      postCount.textContent = n > 0 ? 'Posts: ' + n : '';
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 4. CACHE
+    // ══════════════════════════════════════════════════════════════
+
+    function loadCachedPosts() {
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (_) {}
+      return null;
+    }
+
+    function savePosts(posts) {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(posts));
+      } catch (_) {}
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 5. MASTODON API — FETCH POSTS
+    // ══════════════════════════════════════════════════════════════
+
+    function buildInstanceUrl(instance, cfg) {
+      const base = 'https://' + instance + '/api/v1/timelines/public';
+      const params = new URLSearchParams();
+      if (cfg.local)      params.set('local', 'true');
+      if (cfg.remote)     params.set('remote', 'true');
+      if (cfg.only_media) params.set('only_media', 'true');
+      if (cfg.limit)      params.set('limit', String(cfg.limit));
+      const qs = params.toString();
+      return qs ? base + '?' + qs : base;
+    }
+
+    function normalizePost(status, instance) {
+      return {
+        id:         status.id,
+        instance:   instance,
+        account:    status.account
+                      ? (status.account.acct || status.account.username || 'unknown')
+                      : 'unknown',
+        avatar:     status.account
+                      ? (status.account.avatar_static || status.account.avatar || '')
+                      : '',
+        created_at: status.created_at,
+        url:        status.url,
+        content:    status.content || '',
+        favourites: status.favourites_count || 0,
+        reblogs:    status.reblogs_count    || 0,
+        media:      status.media_attachments || []
+      };
+    }
+
+    async function fetchInstancePosts(instance, cfg) {
+      const url = buildInstanceUrl(instance, cfg);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(instance + ' responded ' + res.status);
+      const statuses = await res.json();
+      return statuses.map(s => normalizePost(s, instance));
+    }
+
+    function parseHandle(handle) {
+      // accept @user@instance or user@instance
+      const clean = handle.replace(/^@/, '');
+      const at = clean.indexOf('@');
+      if (at === -1) return null;
+      return {
+        username: clean.slice(0, at),
+        instance: clean.slice(at + 1)
+      };
+    }
+
+    async function fetchAccountPosts(handle, cfg) {
+      const parsed = parseHandle(handle);
+      if (!parsed) throw new Error('Invalid handle: ' + handle);
+      const { username, instance } = parsed;
+
+      // 1. Lookup
+      const lookupUrl = 'https://' + instance + '/api/v1/accounts/lookup?acct=' + encodeURIComponent(username);
+      const lookupRes = await fetch(lookupUrl);
+      if (!lookupRes.ok) throw new Error('Lookup failed for ' + handle + ' (' + lookupRes.status + ')');
+      const account = await lookupRes.json();
+
+      // 2. Fetch statuses
+      const params = new URLSearchParams();
+      if (cfg.only_media) params.set('only_media', 'true');
+      if (cfg.limit)      params.set('limit', String(cfg.limit));
+      const base = 'https://' + instance + '/api/v1/accounts/' + account.id + '/statuses';
+      const qs   = params.toString();
+      const statusUrl = qs ? base + '?' + qs : base;
+
+      const statusRes = await fetch(statusUrl);
+      if (!statusRes.ok) throw new Error('Statuses failed for ' + handle + ' (' + statusRes.status + ')');
+      const statuses = await statusRes.json();
+      return statuses.map(s => normalizePost(s, instance));
+    }
+
+    function mergePosts(allPosts) {
+      // Deduplicate by "<instance>:<id>", keep newest created_at
+      const map = new Map();
+      for (const post of allPosts) {
+        const key = post.instance + ':' + post.id;
+        const existing = map.get(key);
+        if (!existing || new Date(post.created_at) > new Date(existing.created_at)) {
+          map.set(key, post);
+        }
+      }
+      // Sort descending by created_at
+      return Array.from(map.values()).sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+    }
+
+    async function fetchAllPosts() {
+      const instances = CONFIG.instances || {};
+      const accounts  = CONFIG.accounts  || {};
+
+      const tasks = [];
+
+      for (const [instance, cfg] of Object.entries(instances)) {
+        if (cfg.enabled === false) continue;
+        tasks.push(
+          fetchInstancePosts(instance, cfg)
+            .catch(err => { console.warn('[TootGrid] Instance error:', err); return []; })
+        );
+      }
+
+      for (const [handle, cfg] of Object.entries(accounts)) {
+        if (cfg.enabled === false) continue;
+        tasks.push(
+          fetchAccountPosts(handle, cfg)
+            .catch(err => { console.warn('[TootGrid] Account error:', err); return []; })
+        );
+      }
+
+      const results = await Promise.all(tasks);
+      const flat = results.flat();
+      return mergePosts(flat);
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 6. RENDERING
+    // ══════════════════════════════════════════════════════════════
+
+    function buildMediaCarousel(media) {
+      const images = media.filter(m => m.type === 'image');
+      if (images.length === 0) return null;
+
+      const wrapper = el('div', 'card-media');
+      wrapper.addEventListener('click', e => e.stopPropagation());
+
+      const track = el('div', 'card-media-track');
+
+      images.forEach((img, i) => {
+        const imgEl = el('img', 'card-media-img' + (i === 0 ? ' is-active' : ''));
+        imgEl.src     = img.preview_url || img.url;
+        imgEl.alt     = img.description || 'Media attachment';
+        imgEl.loading = 'lazy';
+        track.appendChild(imgEl);
+      });
+      wrapper.appendChild(track);
+
+      if (images.length > 1) {
+        const prevBtn = el('button', 'media-nav media-nav-prev');
+        prevBtn.type = 'button';
+        prevBtn.textContent = '‹';
+        prevBtn.addEventListener('click', e => e.stopPropagation());
+
+        const nextBtn = el('button', 'media-nav media-nav-next');
+        nextBtn.type = 'button';
+        nextBtn.textContent = '›';
+        nextBtn.addEventListener('click', e => e.stopPropagation());
+
+        const counter = el('div', 'media-counter');
+        counter.textContent = '1 / ' + images.length;
+
+        const dots = el('div', 'media-dots');
+        images.forEach((_, i) => {
+          const dot = el('button', 'media-dot' + (i === 0 ? ' is-active' : ''));
+          dot.type = 'button';
+          dot.addEventListener('click', e => e.stopPropagation());
+          dots.appendChild(dot);
+        });
+
+        wrapper.appendChild(prevBtn);
+        wrapper.appendChild(nextBtn);
+        wrapper.appendChild(counter);
+        wrapper.appendChild(dots);
+      }
+
+      return wrapper;
+    }
+
+    function buildCard(post) {
+      const article = el('article', 'card');
+
+      // Clicking the card background opens the post
+      article.addEventListener('click', () => {
+        window.open(post.url, '_blank', 'noopener,noreferrer');
+      });
+
+      const inner = el('div', 'card-inner');
+
+      // ── Header
+      const header = el('div', 'card-header');
+
+      const userBlock = el('div', 'card-user-block');
+
+      const avatar = el('img', 'card-avatar');
+      avatar.src = post.avatar || '';
+      avatar.alt = '@' + post.account;
+      avatar.loading = 'lazy';
+      // Prevent broken image icon
+      avatar.addEventListener('error', () => { avatar.style.visibility = 'hidden'; });
+      userBlock.appendChild(avatar);
+
+      const userText = el('div', 'card-user-text');
+      const cardUser = el('div', 'card-user');
+      cardUser.textContent = '@' + post.account;
+      const cardInstance = el('div', 'card-instance');
+      cardInstance.textContent = post.instance;
+      userText.appendChild(cardUser);
+      userText.appendChild(cardInstance);
+      userBlock.appendChild(userText);
+
+      const meta = el('div', 'card-meta');
+      meta.textContent = new Date(post.created_at).toLocaleString();
+
+      header.appendChild(userBlock);
+      header.appendChild(meta);
+
+      // ── Content
+      const content = el('div', 'card-content');
+      content.innerHTML = post.content; // Mastodon-sanitized HTML
+
+      // ── Media
+      const media = post.media || [];
+      const carousel = buildMediaCarousel(media);
+
+      // ── Stats
+      const stats = el('div', 'card-stats');
+      const rbStat = el('span', 'stat-item');
+      rbStat.textContent = '🔁 ' + post.reblogs;
+      const favStat = el('span', 'stat-item');
+      favStat.textContent = '⭐ ' + post.favourites;
+      stats.appendChild(rbStat);
+      stats.appendChild(favStat);
+
+      // ── Footer
+      const footer = el('div', 'card-footer');
+      const link = el('a');
+      link.href = post.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = 'Open on Mastodon';
+      link.addEventListener('click', e => e.stopPropagation());
+      footer.appendChild(link);
+
+      // Assemble
+      inner.appendChild(header);
+      inner.appendChild(content);
+      if (carousel) inner.appendChild(carousel);
+      inner.appendChild(stats);
+      inner.appendChild(footer);
+      article.appendChild(inner);
+
+      return article;
+    }
+
+    function renderSkeletons(count) {
+      postsContainer.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const sk = el('div', 'skeleton');
+        sk.innerHTML = `
+          <div style="display:flex;gap:.55rem;align-items:center;margin-bottom:.75rem;">
+            <div class="skeleton-avatar"></div>
+            <div style="flex:1">
+              <div class="skeleton-line medium" style="margin-bottom:.35rem;"></div>
+              <div class="skeleton-line short"></div>
+            </div>
+          </div>
+          <div class="skeleton-line full tall"></div>
+          <div class="skeleton-line full"></div>
+          <div class="skeleton-line medium"></div>
+        `;
+        postsContainer.appendChild(sk);
+      }
+    }
+
+    function renderPosts(posts) {
+      postsContainer.innerHTML = '';
+
+      if (!posts || posts.length === 0) {
+        emptyState.style.display = 'block';
+        setPostCount(0);
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      const frag = document.createDocumentFragment();
+      for (const post of posts) {
+        frag.appendChild(buildCard(post));
+      }
+      postsContainer.appendChild(frag);
+      setPostCount(posts.length);
+
+      initMediaCarousels();
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 7. MEDIA CAROUSEL INIT
+    // ══════════════════════════════════════════════════════════════
+
+    function initMediaCarousels() {
+      const carousels = postsContainer.querySelectorAll('.card-media');
+
+      carousels.forEach(wrapper => {
+        const imageEls = Array.from(wrapper.querySelectorAll('.card-media-img'));
+        if (imageEls.length <= 1) return; // nothing to wire up for single images
+
+        const dotEls   = Array.from(wrapper.querySelectorAll('.media-dot'));
+        const prevBtn  = wrapper.querySelector('.media-nav-prev');
+        const nextBtn  = wrapper.querySelector('.media-nav-next');
+        const counter  = wrapper.querySelector('.media-counter');
+
+        let current = 0;
+
+        function updateActive(index) {
+          imageEls[current].classList.remove('is-active');
+          dotEls[current].classList.remove('is-active');
+          current = index;
+          imageEls[current].classList.add('is-active');
+          dotEls[current].classList.add('is-active');
+          if (counter) counter.textContent = (current + 1) + ' / ' + imageEls.length;
+        }
+
+        if (prevBtn) {
+          prevBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            updateActive((current - 1 + imageEls.length) % imageEls.length);
+          });
+        }
+        if (nextBtn) {
+          nextBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            updateActive((current + 1) % imageEls.length);
+          });
+        }
+
+        dotEls.forEach((dot, i) => {
+          dot.addEventListener('click', e => {
+            e.stopPropagation();
+            updateActive(i);
+          });
+        });
+
+        // ── Touch / Swipe ──────────────────────────────────────
+        let startX = 0, startY = 0, isSwiping = false;
+
+        wrapper.addEventListener('touchstart', e => {
+          startX    = e.touches[0].clientX;
+          startY    = e.touches[0].clientY;
+          isSwiping = true;
+        }, { passive: true });
+
+        wrapper.addEventListener('touchmove', e => {
+          if (!isSwiping) return;
+          const dx = Math.abs(e.touches[0].clientX - startX);
+          const dy = Math.abs(e.touches[0].clientY - startY);
+          if (dx > dy && dx > 10) {
+            e.preventDefault(); // suppress page scroll during horizontal swipe
+          }
+        }, { passive: false });
+
+        wrapper.addEventListener('touchend', e => {
+          if (!isSwiping) return;
+          isSwiping = false;
+          const endX = e.changedTouches[0].clientX;
+          const dx   = endX - startX;
+          const THRESHOLD = 50;
+          if (dx < -THRESHOLD) {
+            updateActive((current + 1) % imageEls.length);
+          } else if (dx > THRESHOLD) {
+            updateActive((current - 1 + imageEls.length) % imageEls.length);
+          }
+          e.stopPropagation();
+        });
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 8. REFRESH
+    // ══════════════════════════════════════════════════════════════
+
+    async function refreshPosts(isAuto) {
+      if (isRefreshing) return;
+      isRefreshing = true;
+
+      setStatus(isAuto ? 'Auto-refreshing…' : 'Fetching…', 'fetching');
+      setInfo(isAuto ? 'Auto-refreshing…' : 'Refreshing posts…');
+
+      try {
+        const posts = await fetchAllPosts();
+
+        if (posts.length === 0) {
+          // Keep cached content visible if we got nothing back
+          const cached = loadCachedPosts();
+          if (cached && cached.length > 0) {
+            renderPosts(cached);
+            setInfo('Network returned no posts. Showing cache.');
+          } else {
+            renderPosts([]);
+            setInfo('No posts found. Check config.json.');
+          }
+        } else {
+          savePosts(posts);
+          renderPosts(posts);
+          setInfo('Last updated ' + new Date().toLocaleTimeString());
+        }
+        setStatus('Live', 'live');
+      } catch (err) {
+        console.error('[TootGrid] Refresh error:', err);
+        setStatus('Error', 'error');
+        setInfo('Error fetching posts: ' + err.message);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // 9. AUTO-REFRESH & COUNTDOWN
+    // ══════════════════════════════════════════════════════════════
+
+    function formatCountdown(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function setupAutoRefresh() {
+      const arCfg = CONFIG.autoRefresh || {};
+      const enabled = arCfg.enabled !== false; // default true if not set
+      const seconds = Number(arCfg.seconds) || 0;
+
+      if (!enabled || seconds <= 0) {
+        refreshCountdown.classList.add('chip-hidden');
+        return;
+      }
+
+      autoRefreshIntervalSec = seconds;
+      nextRefreshAt = Date.now() + autoRefreshIntervalSec * 1000;
+
+      refreshCountdown.classList.remove('chip-hidden');
+      refreshCountdown.textContent = formatCountdown(autoRefreshIntervalSec);
+
+      if (countdownTimer) clearInterval(countdownTimer);
+
+      countdownTimer = setInterval(async () => {
+        const remaining = (nextRefreshAt - Date.now()) / 1000;
+
+        if (remaining > 0) {
+          refreshCountdown.textContent = formatCountdown(remaining);
+        } else {
+          refreshCountdown.textContent = 'Refreshing…';
+          await refreshPosts(true);
+          nextRefreshAt = Date.now() + autoRefreshIntervalSec * 1000;
+        }
+      }, 1000);
+    }
+
+    // ── Manual Refresh Button ──────────────────────────────────────
+    refreshBtn.addEventListener('click', () => {
+      if (autoRefreshIntervalSec > 0) {
+        nextRefreshAt = Date.now() + autoRefreshIntervalSec * 1000;
+      }
+      refreshPosts(false);
+    });
+
+    // ══════════════════════════════════════════════════════════════
+    // 10. BOOT SEQUENCE
+    // ══════════════════════════════════════════════════════════════
+
+    async function boot() {
+      setStatus('Starting…', '');
+
+      // 1. Load config
+      const ok = await loadConfig();
+      if (!ok) return;
+
+      // 2. Apply theme (after config so overrides are available)
+      initTheme();
+
+      // 3. Show cached posts immediately
+      const cached = loadCachedPosts();
+      if (cached) {
+        renderPosts(cached);
+        setInfo('Loaded from cache — updating…');
+        setPostCount(cached.length);
+      } else {
+        // Show skeleton placeholders while fetching
+        renderSkeletons(6);
+        setInfo('Fetching posts…');
+      }
+
+      // 4. Fresh network fetch
+      await refreshPosts(false);
+
+      // 5. Start auto-refresh countdown
+      setupAutoRefresh();
+    }
+
+    // Kick off
+    boot();
+
+  })();
+  </script>
+
+</body>
+</html>

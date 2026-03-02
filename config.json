@@ -1,0 +1,52 @@
+{
+  "title": "My Fancy TootGrid",
+  "favicon": "favicon.png",
+
+  "cacheKey": "TootGrid_posts_v1",
+
+  "layout": {
+    "mode": "grid"
+  },
+
+  "theme": {
+    "defaultMode": "auto",
+    "lightOverrides": {
+      "--accent": "#2563eb",
+      "--accent-soft": "rgba(37, 99, 235, 0.12)"
+    },
+    "darkOverrides": {
+      "--accent": "#60a5fa",
+      "--accent-soft": "rgba(96, 165, 250, 0.25)"
+    }
+  },
+
+  "autoRefresh": {
+    "enabled": true,
+    "seconds": 300
+  },
+
+  "instances": {
+    "wisskomm.social": {
+      "enabled": true,
+      "local": true,
+      "remote": false,
+      "only_media": false,
+      "limit": 10
+    },
+    "idw-online.social": {
+      "enabled": true,
+      "local": true,
+      "remote": false,
+      "only_media": false,
+      "limit": 10
+    }
+  },
+
+  "accounts": {
+    "@SomeUser@mastodon.social": {
+      "enabled": false,
+      "only_media": false,
+      "limit": 5
+    }
+  }
+}
