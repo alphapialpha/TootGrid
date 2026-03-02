@@ -346,7 +346,7 @@
     // 6. RENDERING
     // ══════════════════════════════════════════════════════════════
 
-    function buildMediaCarousel(media) {
+    function buildMediaCarousel(media, postUrl) {
       const images = media.filter(m => m.type === 'image');
       if (images.length === 0) return null;
 
@@ -360,6 +360,11 @@
         imgEl.src     = img.preview_url || img.url;
         imgEl.alt     = img.description || 'Media attachment';
         imgEl.loading = 'lazy';
+        imgEl.title   = 'Open on Mastodon';
+        imgEl.addEventListener('click', e => {
+          e.stopPropagation();
+          window.open(postUrl, '_blank', 'noopener,noreferrer');
+        });
         track.appendChild(imgEl);
       });
       wrapper.appendChild(track);
@@ -368,12 +373,10 @@
         const prevBtn = el('button', 'media-nav media-nav-prev');
         prevBtn.type = 'button';
         prevBtn.textContent = '‹';
-        prevBtn.addEventListener('click', e => e.stopPropagation());
 
         const nextBtn = el('button', 'media-nav media-nav-next');
         nextBtn.type = 'button';
         nextBtn.textContent = '›';
-        nextBtn.addEventListener('click', e => e.stopPropagation());
 
         const counter = el('div', 'media-counter');
         counter.textContent = '1 / ' + images.length;
@@ -382,7 +385,6 @@
         images.forEach((_, i) => {
           const dot = el('button', 'media-dot' + (i === 0 ? ' is-active' : ''));
           dot.type = 'button';
-          dot.addEventListener('click', e => e.stopPropagation());
           dots.appendChild(dot);
         });
 
@@ -436,10 +438,18 @@
       // ── Content
       const content = el('div', 'card-content');
       content.innerHTML = post.content; // Mastodon-sanitized HTML
+      // Force all content links to open in a new tab and stop bubble to card handler
+      content.querySelectorAll('a').forEach(a => {
+        a.target = '_blank';
+        a.rel    = 'noopener noreferrer';
+      });
+      content.addEventListener('click', e => {
+        if (e.target.closest('a')) e.stopPropagation();
+      });
 
       // ── Media
       const media = post.media || [];
-      const carousel = buildMediaCarousel(media);
+      const carousel = buildMediaCarousel(media, post.url);
 
       // ── Stats
       const stats = el('div', 'card-stats');

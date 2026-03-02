@@ -416,6 +416,7 @@ body.layout-list .feed-grid {
   max-height: 220px;
   object-fit: cover;
   border-radius: inherit;
+  cursor: pointer;
 }
 .card-media-img.is-active {
   display: block;
