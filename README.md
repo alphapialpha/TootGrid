@@ -1,4 +1,4 @@
-# 🐘 TootGrid
+# <img src="TootGridLogo.webp" height="32" alt="TootGrid Logo"> TootGrid
 
 A lightweight, self-contained Mastodon "toots" viewer. Display public posts from one or more Mastodon instances and/or specific user accounts as a clean, responsive card grid — with dark mode, media carousels, auto-refresh, and local caching.
 
