@@ -232,21 +232,41 @@
     }
 
     function normalizePost(status, instance) {
+      const src = status.reblog || status;  // content source: original post for boosts, self otherwise
+      // For boosts, show the original author's instance (parsed from their acct or url)
+      let srcInstance = instance;
+      if (status.reblog) {
+        const acct = src.account?.acct || '';
+        if (acct.includes('@')) {
+          srcInstance = acct.split('@')[1];
+        } else {
+          try { srcInstance = new URL(src.account?.url || '').hostname || instance; } catch (_) {}
+        }
+      }
       return {
         id:         status.id,
-        instance:   instance,
-        account:    status.account
-                      ? (status.account.acct || status.account.username || 'unknown')
+        instance:   srcInstance,
+        account:    src.account
+                      ? (src.account.acct || src.account.username || 'unknown')
                       : 'unknown',
-        avatar:     status.account
-                      ? (status.account.avatar_static || status.account.avatar || '')
+        avatar:     src.account
+                      ? (src.account.avatar_static || src.account.avatar || '')
                       : '',
-        created_at: status.created_at,
-        url:        status.url,
-        content:    status.content || '',
-        favourites: status.favourites_count || 0,
-        reblogs:    status.reblogs_count    || 0,
-        media:      status.media_attachments || []
+        created_at: src.created_at,
+        url:        (status.url || '').replace(/\/activity$/, ''),
+        content:    src.content || '',
+        favourites: src.favourites_count || 0,
+        reblogs:    src.reblogs_count    || 0,
+        media:      src.media_attachments || [],
+        // null for original posts; populated for boosts
+        boostedBy:  status.reblog
+                      ? (() => {
+                          const acct = status.account?.acct || status.account?.username || null;
+                          if (!acct) return null;
+                          return '@' + (acct.includes('@') ? acct : acct + '@' + instance);
+                        })()
+                      : null,
+        boosterUrl: status.reblog ? (status.account?.url || null) : null
       };
     }
 
@@ -401,6 +421,23 @@
       });
 
       const inner = el('div', 'card-inner');
+
+      // ── Boost attribution
+      if (post.boostedBy) {
+        const boostedByEl = el('div', 'card-boosted-by');
+        if (post.boosterUrl) {
+          const a = el('a');
+          a.href = post.boosterUrl;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = '🔁 Boosted by ' + post.boostedBy;
+          a.addEventListener('click', e => e.stopPropagation());
+          boostedByEl.appendChild(a);
+        } else {
+          boostedByEl.textContent = '🔁 Boosted by ' + post.boostedBy;
+        }
+        inner.appendChild(boostedByEl);
+      }
 
       // ── Header
       const header = el('div', 'card-header');
