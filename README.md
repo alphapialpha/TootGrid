@@ -10,7 +10,7 @@ A lightweight, self-contained Mastodon "toots" viewer. Display public posts from
 
 - [✨ Why TootGrid?](#-why-tootgrid)
 - [🚀 Quick Start](#-quick-start)
-- [⚙️ Configuration (config.json)](#️-configuration-configjson)
+- [⚙️ Configuration (config.json.example → config.json)](#️-configuration-configjsonexample--configjson)
   - [Top-level fields](#top-level-fields)
   - [layout](#layout)
   - [theme](#theme)
@@ -38,11 +38,12 @@ A lightweight, self-contained Mastodon "toots" viewer. Display public posts from
 
 ## 🚀 Quick Start
 
-1. Drop `config.json`, `index.html`, and `style.css` + images into any directory on a static web host
-2. Edit `config.json` to point at your Mastodon instances or accounts
-3. Open in a browser
+1. Clone or download the repo
+2. **Copy** `config.json.example` to `config.json` and edit it to point at your Mastodon instances or accounts
+3. Drop `config.json`, `index.html`, `style.css`, and the logo images into any directory on a static web host
+4. Open in a browser
 
-That's it.
+That's it. `config.json` is listed in `.gitignore` — your personal config will never be overwritten by a `git pull`.
 
 For local development, any simple static server works:
 
@@ -59,9 +60,9 @@ php -S localhost:8080
 
 ---
 
-## ⚙️ Configuration (`config.json`)
+## ⚙️ Configuration (`config.json.example` → `config.json`)
 
-Everything is controlled from `config.json`. All fields are optional and fall back to sensible defaults if omitted.
+Copy `config.json.example` to `config.json` and edit to your needs. All fields are optional and fall back to sensible defaults if omitted.
 
 ---
 
@@ -70,7 +71,6 @@ Everything is controlled from `config.json`. All fields are optional and fall ba
 ```json
 {
   "title": "My Fancy TootGrid",
-  "favicon": "favicon.png",
   "cacheKey": "TootGrid_posts_v1"
 }
 ```
@@ -78,7 +78,6 @@ Everything is controlled from `config.json`. All fields are optional and fall ba
 | Field | Description | Default |
 |---|---|---|
 | `title` | Shown in the browser tab and the header bar | `"TootGrid"` |
-| `favicon` | Path or URL to the favicon file | `"favicon.ico"` |
 | `cacheKey` | `localStorage` key used to persist posts between page loads. Change this (e.g. append `_v2`) to bust the cache | `"TootGrid_posts_v1"` |
 
 ---

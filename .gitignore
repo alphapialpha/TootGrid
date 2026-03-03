@@ -1,0 +1,5 @@
+# User config — copy config.json.example to config.json and edit to your needs
+config.json
+
+# macOS
+.DS_Store

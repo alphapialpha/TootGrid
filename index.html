@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TootGrid</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" id="faviconLink" href="favicon.ico">
+  <link rel="icon" id="faviconLink" href="favicon.png">
 </head>
 <body class="layout-grid">
 
@@ -121,11 +121,6 @@
       const title = CONFIG.title || 'TootGrid';
       document.title = title;
       appTitle.textContent = title;
-
-      // Favicon
-      if (CONFIG.favicon) {
-        $('faviconLink').href = CONFIG.favicon;
-      }
 
       // Layout
       const mode = (CONFIG.layout && CONFIG.layout.mode) || 'grid';
