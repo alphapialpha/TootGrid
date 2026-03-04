@@ -4,6 +4,10 @@ A lightweight, self-contained Mastodon "toots" viewer. Display public posts from
 
 **No build step. No framework. No server-side language. Just three main files + some images.**
 
+> 🐼 If TootGrid saves you time or makes you smile, a coffee keeps the panda coding — thank you! ☕
+> 
+> [![Support me on Ko-Fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/AlphaPiAlpha)
+
 ---
 
 ## 📑 Table of Contents
@@ -250,6 +254,10 @@ All design decisions, configuration architecture, feature choices, and final imp
 ## ☕ About
 
 Developed as a weekend project — made with love, Linux, and coffee.
+
+If TootGrid is useful to you, consider fuelling the next feature with a coffee — the panda will be very grateful 🐼
+
+[![Support me on Ko-Fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/AlphaPiAlpha)
 
 ---
 
