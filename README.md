@@ -226,7 +226,7 @@ TootGrid supports two logo variants in the header:
 
 Replace these with your own branding or remove the `<picture>` element from `index.html` entirely if you prefer text-only.
 
-> ⚠️ **Image license:** The logo images are **not** covered by the MIT license and are © 2026 AlphaPiAlpha, All Rights Reserved. You may replace them with your own images but may not reuse, alter, or redistribute the originals outside of TootGrid. See [LICENSE](LICENSE) for details.
+> ⚠️ **Image license:** The logo images are **not** covered by the MIT license and are © 2026 André P. Appel (AlphaPiAlpha), All Rights Reserved. You may replace them with your own images but may not reuse, alter, or redistribute the originals outside of TootGrid. See [LICENSE](LICENSE) for details.
 
 ---
 
@@ -265,10 +265,6 @@ If TootGrid is useful to you, consider fuelling the next feature with a coffee �
 
 **MIT License** — you are free to use, modify, and distribute this project, including commercially.
 
-**Two conditions apply beyond standard MIT:**
-
-> **1. Attribution link** — The visible attribution link in the application UI (`© AlphaPiAlpha · GitHub`) must be retained in both unmodified and modified distributions.
-
-> **2. Image assets** — `TootGridLogo.webp` and `TootGridLogoSquare.webp` are © AlphaPiAlpha, All Rights Reserved, and are **not** covered by the MIT license. They may not be reused, altered, or redistributed outside of TootGrid. You are free to replace them with your own images.
+> **Image assets** — `TootGridLogo.webp` and `TootGridLogoSquare.webp` are © André P. Appel (AlphaPiAlpha), All Rights Reserved, and are **not** covered by the MIT license. They may not be reused, altered, or redistributed outside of TootGrid. You are free to replace them with your own images.
 
 See the [LICENSE](LICENSE) file for the full text.
