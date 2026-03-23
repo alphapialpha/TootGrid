@@ -226,15 +226,13 @@ TootGrid supports two logo variants in the header:
 
 Replace these with your own branding or remove the `<picture>` element from `index.html` entirely if you prefer text-only.
 
-> ⚠️ **Image license:** The logo images are **not** covered by the MIT license and are © 2026 André P. Appel (AlphaPiAlpha), All Rights Reserved. You may replace them with your own images but may not reuse, alter, or redistribute the originals outside of TootGrid. See [LICENSE](LICENSE) for details.
-
 ---
 
 ## 💾 Caching
 
 Posts are cached in `localStorage` under the configured `cacheKey`. On every page load, cached posts are rendered instantly before the network fetch completes — so the user always sees content immediately, even on slow connections. After each successful fetch the cache is silently updated.
 
-To bust the cache, increment the `cacheKey` value in `config.json` (e.g. `"TootGrid_posts_v2"`).
+To bust the cache, change the `cacheKey` value in `config.json` (e.g. `"TootGrid_posts_foobar"`).
 
 ---
 
@@ -255,16 +253,10 @@ All design decisions, configuration architecture, feature choices, and final imp
 
 Developed as a weekend project — made with love, Linux, and coffee.
 
-If TootGrid is useful to you, consider fuelling the next feature with a coffee — the panda will be very grateful 🐼
-
-[![Support me on Ko-Fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/AlphaPiAlpha)
-
 ---
 
 ## 📄 License
 
 **MIT License** — you are free to use, modify, and distribute this project, including commercially.
-
-> **Image assets** — `TootGridLogo.webp` and `TootGridLogoSquare.webp` are © André P. Appel (AlphaPiAlpha), All Rights Reserved, and are **not** covered by the MIT license. They may not be reused, altered, or redistributed outside of TootGrid. You are free to replace them with your own images.
 
 See the [LICENSE](LICENSE) file for the full text.
