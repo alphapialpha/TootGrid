@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 André P. Appel (AlphaPiAlpha) (https://github.com/alphapialpha)
+Copyright (c) 2026 André P. Appel (AlphaPiAlpha)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,20 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-IMAGE ASSETS — ALL RIGHTS RESERVED
-
-The image files included in this repository (TootGridLogo.webp,
-TootGridLogoSquare.webp, and any other image or graphic assets) are NOT
-covered by the MIT License above. These assets are copyright © 2026 André P. Appel
-(AlphaPiAlpha), All Rights Reserved.
-
-You may NOT:
-  - Use these images outside of an unmodified or modified TootGrid deployment
-  - Alter, remix, or create derivative works from these images
-  - Redistribute these images independently of the TootGrid project
-
-You MAY replace them entirely with your own images when customizing TootGrid
-for your own deployment.
